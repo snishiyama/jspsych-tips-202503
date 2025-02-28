@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My experiment</title>
+    <script src="https://unpkg.com/jspsych@8.2.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.1.0"></script>
+    <link
+      href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <body></body>
+  <script>
+    (() => {
+      const jsPsych = initJsPsych();
+
+      const duration = 3000;
+      const timeouts = [];
+      const recall = {
+        type: jsPsychSurveyText,
+        preamble:
+          "覚えた単語を入力してください。一つのテキストボックスに1個入力。",
+        questions: [
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+          { prompt: "", columns: 10, rows: 1 },
+        ],
+        button_label: "解答を終了する",
+        on_load: function () {
+          // button config
+          const btn = document.getElementById("jspsych-survey-text-next");
+          const textboxes = [];
+          for (let i = 0; i < 10; i++) {
+            textboxes.push(document.getElementById(`input-${i}`));
+          }
+          if (btn != null) {
+            btn.style.visibility = "hidden"; // ボタンを非表示に
+            btn.disabled = true; // ボタンを反応しなくする（非表示にするだけだとエンターキーでの入力確定を受け付けてしまう
+          }
+          const getBtnVisible = function () {
+            btn.style.visibility = "visible"; // ボタンを表示
+            btn.disabled = false; // ボタンを有効に
+            // textboxes配列に入った10個分のテキストボックス要素をまとめて処理
+            textboxes.map((tb) => {
+              tb.readOnly = true; // テキストボックスへの入力不可に
+              tb.style.backgroundColor = "gray"; // テキストボックスの背景色をグレーに
+            });
+          };
+          const tout = window.setTimeout(getBtnVisible, duration);
+          timeouts.push(tout);
+        },
+        on_finish: function () {
+          timeouts.map((to) => window.clearTimeout(to));
+        },
+      };
+
+      jsPsych.run([recall]);
+    })();
+  </script>
+</html>

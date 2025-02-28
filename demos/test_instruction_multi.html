@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My experiment</title>
+    <script src="https://unpkg.com/jspsych@8.2.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@2.1.0"></script>
+    <link
+      href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <body></body>
+  <script>
+    (() => {
+      const jsPsych = initJsPsych({
+        on_finish: function () {
+          jsPsych.data.displayData();
+        },
+      });
+
+      const instruction = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus:
+          "<p>今回の実験では10個の日本語単語を覚えてもらいます。</p>" +
+          "<p>単語は画面に一つずつ表示されます。表示時間は5秒です。</p>" +
+          "<p>全てが表示され終わったら、それらを思い出してもらいます。</p>" +
+          "<p>テキストボックスにタイプしてください。</p>",
+        choices: ["次へ進む"],
+      };
+
+      let testAccuracy = 0;
+
+      const test = {
+        type: jsPsychSurveyMultiChoice,
+        preamble:
+          "実験の手順に関する確認を行います。以下の設問に解答してください。",
+        questions: [
+          {
+            prompt: "本実験で覚える単語は全部で何個ですか",
+            options: ["10", "20", "30", "40"],
+            required: true,
+            name: "itemN",
+          },
+          {
+            prompt: "単語は何個ずつ表示されますか",
+            options: ["1", "2", "5", "10"],
+            required: true,
+            name: "displayN",
+          },
+          {
+            prompt: "単語が表示される時間は何秒ですか",
+            options: ["3", "5", "10", "15"],
+            required: true,
+            name: "duration",
+          },
+          {
+            prompt: "どのようにして思い出しますか",
+            options: ["口頭で答える", "タイプする", "選択肢の中から選ぶ"],
+            required: true,
+            name: "testFormat",
+          },
+        ],
+        button_label: "解答を終了する",
+        on_finish: function (data) {
+          testAccuracy += Number(data.response["itemN"] === "10");
+          testAccuracy += Number(data.response["displayN"] === "1");
+          testAccuracy += Number(data.response["duration"] === "5");
+          testAccuracy += Number(data.response["testFormat"] === "タイプする");
+          testAccuracy = testAccuracy / 4;
+        },
+      };
+
+      const notifyOneMore = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus:
+          "確認問題に誤りがあったので， " +
+          "もう一度説明を読んでいただきます。",
+        choices: ["説明画面に進む"],
+        trial_duration: null,
+      };
+      const tlNotifyOneMore = {
+        timeline: [notifyOneMore],
+        conditional_function: function () {
+          return testAccuracy !== 1;
+        },
+      };
+
+      const notifyCongrats = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus:
+          "確認問題は全問正解でした。 " +
+          "説明をよく読んでいただきありがとうございます。<br>" +
+          "それでは，実験課題を始めます。",
+        choices: ["実験課題に進む"],
+        trial_duration: null,
+      };
+      const tlNotifyCongrats = {
+        timeline: [notifyCongrats],
+        conditional_function: function () {
+          return testAccuracy === 1;
+        },
+      };
+
+      const instruction_and_test = {
+        timeline: [instruction, test, tlNotifyOneMore, tlNotifyCongrats],
+        loop_function: function () {
+          return testAccuracy !== 1;
+        },
+      };
+
+      jsPsych.run([instruction_and_test]);
+    })();
+  </script>
+</html>

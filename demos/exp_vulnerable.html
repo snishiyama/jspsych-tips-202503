@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My experiment</title>
+    <script src="https://unpkg.com/jspsych@8.2.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+    <link
+      href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <body></body>
+  <script>
+    const jsPsych = initJsPsych();
+
+    const dummy_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Change `hello_trial` with the browser's console.",
+    };
+
+    const hello_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Hello world!",
+      choices: "NO_KEYS",
+    };
+
+    jsPsych.run([dummy_trial, hello_trial]);
+  </script>
+</html>
